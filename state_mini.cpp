@@ -184,17 +184,54 @@ void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
     }
     out << "\t\n";
     out << "\tINIT -> " << state_table[0][0] << ";\n";
+
+    vector<vector<string> > trans;
     int bound = getNextStateBound(state_table);
     for (int a = 0; a < state_table.size(); a++)
     {
         for (int j = 1; j < bound; j++)
         {
-            out << "\t" << state_table[a][0] << " -> " 
-                << state_table[a][j] << " [label=\""
-                << dec2str(j - 1, i) << "/"
-                << state_table[a][j - 1 + bound] << "\"];\n";
+            vector<string> vec;
+            vec.push_back(state_table[a][0] );
+            vec.push_back(dec2str(j - 1, i) ); 
+            vec.push_back(state_table[a][j] );
+            vec.push_back(state_table[a][j - 1 + bound] );
+            trans.push_back(vec);
         }
     }
+    // print_out("Transition:", trans);
+    
+    for (int a = 0; a < trans.size(); a++)
+    {
+        for (int j = a + 1; j < trans.size(); j++)
+        {
+            if (trans[a][0] == trans[j][0] && trans[a][2] == trans[j][2])
+            {
+                trans[a].push_back(trans[j][1] );
+                trans[a].push_back(trans[j][3] );
+                vector<vector<string> >::iterator it = trans.begin() + j;
+                trans.erase(it);
+                j -= 1;
+            }
+        }
+    }
+    // print_out("Transition:", trans);
+
+    for (int a = 0; a < trans.size(); a++)
+    {
+        out << "\t" << trans[a][0] << " -> " << trans[a][2]
+            << " [label=\"" << trans[a][1] << "/" << trans[a][3];
+        int j = 4;
+        while (j < trans[a].size())
+        {
+            out << ",";
+            out << trans[a][j] << "/" << trans[a][j + 1];
+            j += 2;
+        }
+        out << "\"];\n";
+    }
+
+    // end of file
     out << "}\n";
 }
 
@@ -267,7 +304,7 @@ int main(int argc, char** argv)
     // turn into a table
     turn2tab(state_table, state, next_state, output);
 
-    print_out("state_table:", state_table);
+    print_out("State Table:", state_table);
 
     // first classification by output
     vector<set<string> > first_class;
@@ -284,14 +321,14 @@ int main(int argc, char** argv)
     // the rest of the states
     vector<string> rest;
     vec_set2vec(second_class, rest);
-    print_out(rest);
+    // print_out(rest);
 
     // deal with the next_state problem since the next_state will changed
     vector<vector<string> > new_state_table;
     newStateTable(rest, state_table, new_state_table);
-    print_out("new_state_table:", new_state_table);
+    // print_out("new_state_table:", new_state_table);
     next_state_deal(second_class, new_state_table);
-    print_out("new_state_table:", new_state_table);
+    print_out("The Rest of States:", new_state_table);
 
     // start to deal with kiss-format output
     kissOutput(out, i, o, rest, new_state_table);

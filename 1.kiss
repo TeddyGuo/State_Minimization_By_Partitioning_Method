@@ -1,4 +1,4 @@
-.kiss_start
+.start_kiss
 .i 2
 .o 1
 .p 8
@@ -12,4 +12,4 @@
 01 S2 S2 0
 10 S2 S1 1
 11 S2 S2 1
-.kiss_end
+.end_kiss

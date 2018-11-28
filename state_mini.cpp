@@ -172,21 +172,28 @@ void kissOutput(fstream& out, int i, int o, vector<string> rest, vector<vector<s
 
     out << ".end_kiss\n";
 }
-void dotOutput(fstream& out, vector<vector<string> > state_table)
+void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
 {
     out << "diagraph STG {\n";
     out << "\trankdir=LR;\n";
     out << "\t\n";
     out << "\tINIT [shape=point];\n";
-    for (int i = 0; i < state_table.size(); i++)
+    for (int a = 0; a < state_table.size(); a++)
     {
-        out << "\t" << state_table[i][0] << " [label=\"" << state_table[i][0] << "\"];\n";
+        out << "\t" << state_table[a][0] << " [label=\"" << state_table[a][0] << "\"];\n";
     }
     out << "\t\n";
     out << "\tINIT -> " << state_table[0][0] << ";\n";
-    for (int i = 0; i < state_table.size(); i++)
+    int bound = getNextStateBound(state_table);
+    for (int a = 0; a < state_table.size(); a++)
     {
-        
+        for (int j = 1; j < bound; j++)
+        {
+            out << "\t" << state_table[a][0] << " -> " 
+                << state_table[a][j] << " [label=\""
+                << dec2str(j - 1, i) << "/"
+                << state_table[a][j - 1 + bound] << "\"];\n";
+        }
     }
     out << "}\n";
 }
@@ -290,7 +297,7 @@ int main(int argc, char** argv)
     kissOutput(out, i, o, rest, new_state_table);
 
     // start to deal with dot-format output
-    dotOutput(graph, new_state_table);
+    dotOutput(graph, i, new_state_table);
 
     close(in, out, graph);
     return 0;

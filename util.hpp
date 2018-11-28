@@ -34,8 +34,8 @@ int position_of_state(vector<string> state, string str)
     }
     return -1;
 }
-// string to a binary number
-int string_to_binary(string str)
+// string to a decimal number
+int string_to_decimal(string str)
 {
     int num = 0;
     reverse(str.begin(), str.end());
@@ -44,6 +44,28 @@ int string_to_binary(string str)
         num += (int)(str[i] - '0') * pow(2, j);
     }
     return num;
+}
+// decimal number to a binary number and then turn to a string
+string dec2str(int num, int i) // .i var to deal with 0
+{
+    // decimal to binary
+    vector<int> arr(i, 0);
+    int j = 0, r;
+    
+    while (num != 0)
+    {
+        r = num % 2;
+        arr[j++] = r;
+        num /= 2;
+    }
+    reverse(arr.begin(), arr.end());
+
+    string str = "";
+    for (j = 0; j < arr.size(); j++)
+    {
+        str += to_string(arr[j]);
+    }
+    return str;
 }
 bool isRepeat(vector<string> vec, string str)
 {
@@ -87,15 +109,27 @@ int position_in_state_table(string state, vector<vector<string> > state_table)
     }
     return -1;
 }
-// check whether the element is in the set or not
+// check whether the element is in the set or not and return score
 int is_in(string element, vector<set<string> > class_set)
 {
     for (int i = 0; i < class_set.size(); i++)
     {
         if (class_set[i].find(element) != class_set[i].end() )
+        {
             return i;
+        }
     }
     return -1;
+}
+// check whether the state in rest or not
+bool is_in(string str, vector<string> rest)
+{
+    for (int i = 0; i < rest.size(); i++)
+    {
+        if (rest[i] == str)
+            return true;
+    }
+    return false;
 }
 // find min num in an integer vector
 int min_val(vector<int> vec)

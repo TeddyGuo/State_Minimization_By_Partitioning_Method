@@ -52,7 +52,7 @@ void classByOutput(vector<set<string> >& first_class, int o, vector<vector<strin
     for (int temp = 0; temp < state_table.size(); temp++)
     {
         string str = state_table[temp][size - 2] + state_table[temp][size - 1];
-        int bin = string_to_binary(str);
+        int bin = string_to_decimal(str);
 
         // store the index
         vec_vec[bin].push_back(temp);
@@ -121,6 +121,75 @@ void partitioning(vector<set<string> >& second_class, vector<set<string> > first
 
     second_class = first_class;
 }
+void newStateTable(vector<string> rest, vector<vector<string> > state_table, vector<vector<string> >& new_state_table)
+{
+    for (int i = 0; i < rest.size(); i++)
+    {
+        int position = position_in_state_table(rest[i], state_table);
+        new_state_table.push_back(state_table[position]);
+    }
+}
+void next_state_deal(vector<set<string> > second_class, vector<vector<string> >& new_state_table)
+{
+    for (int i = 0; i < new_state_table.size(); i++)
+    {
+        int bound = getNextStateBound(new_state_table);
+        for (int j = 1; j < bound; j++)
+        {
+            int position = is_in(new_state_table[i][j], second_class);
+            set<string>::iterator it = second_class[position].begin();
+            new_state_table[i][j] = *it;
+        }
+    }
+}
+void kissOutput(fstream& out, int i, int o, vector<string> rest, vector<vector<string> > state_table)
+{
+    out << ".start_kiss\n";
+    out << ".i " << i << "\n";
+    out << ".o " << o << "\n";
+    out << ".p " << rest.size() * pow(2, i) << "\n";
+    out << ".s " << rest.size() << "\n";
+    out << ".r " << rest[0] << "\n";
+    // state transition part
+    int next_state_end = getNextStateBound(state_table);
+
+    for (int j = 0; j < rest.size(); j++)
+    {
+        int position = position_in_state_table(rest[j], state_table);
+
+        for (int k = 1; k < next_state_end; k++)
+        {
+            out << dec2str(k - 1, i) << " ";
+            out << state_table[position][0] << " ";
+            if (!is_in(state_table[position][k], rest) )
+                out << state_table[position][0];
+            else
+                out << state_table[position][k];
+            out << " ";
+            out << state_table[position][k - 1 + next_state_end] << "\n";
+        }
+    }
+
+    out << ".end_kiss\n";
+}
+void dotOutput(fstream& out, vector<vector<string> > state_table)
+{
+    out << "diagraph STG {\n";
+    out << "\trankdir=LR;\n";
+    out << "\t\n";
+    out << "\tINIT [shape=point];\n";
+    for (int i = 0; i < state_table.size(); i++)
+    {
+        out << "\t" << state_table[i][0] << " [label=\"" << state_table[i][0] << "\"];\n";
+    }
+    out << "\t\n";
+    out << "\tINIT -> " << state_table[0][0] << ";\n";
+    for (int i = 0; i < state_table.size(); i++)
+    {
+        
+    }
+    out << "}\n";
+}
 
 // main func
 int main(int argc, char** argv)
@@ -180,7 +249,7 @@ int main(int argc, char** argv)
                 state.push_back(str1);
 
             int position = position_of_state(state, str1);
-            int bin = string_to_binary(str);
+            int bin = string_to_decimal(str);
             next_state[position][bin] = str2;
             output[position][bin] = str3;
         }
@@ -208,11 +277,20 @@ int main(int argc, char** argv)
     // the rest of the states
     vector<string> rest;
     vec_set2vec(second_class, rest);
-
     print_out(rest);
 
-    // start to deal with kiss format output
-    
+    // deal with the next_state problem since the next_state will changed
+    vector<vector<string> > new_state_table;
+    newStateTable(rest, state_table, new_state_table);
+    print_out("new_state_table:", new_state_table);
+    next_state_deal(second_class, new_state_table);
+    print_out("new_state_table:", new_state_table);
+
+    // start to deal with kiss-format output
+    kissOutput(out, i, o, rest, new_state_table);
+
+    // start to deal with dot-format output
+    dotOutput(graph, new_state_table);
 
     close(in, out, graph);
     return 0;

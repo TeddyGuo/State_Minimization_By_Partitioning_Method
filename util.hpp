@@ -155,15 +155,6 @@ bool is_digit(string str)
 {
     return str.find_first_not_of("0123456789") == string::npos;
 }
-int getDiffScore(vector<int> score)
-{
-    set<int> score_set;
-    for (int i = 0; i < score.size(); i++)
-    {
-        score_set.insert(score[i]);
-    }
-    return score_set.size();
-}
 // get the bound of next states in the state_table
 int getNextStateBound(vector<vector<string> > state_table)
 {
@@ -234,6 +225,5 @@ void print_out(vector<T> vec)
     }
     cout << endl;
 }
-
 
 #endif

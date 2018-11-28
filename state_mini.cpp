@@ -40,78 +40,73 @@ void turn2tab(vector<vector<string> >& state_table, vector<string> state, vector
 // classify state by output
 void classByOutput(vector<set<string> >& first_class, int o, vector<vector<string> > state_table, vector<string> state)
 {
-    vector<vector<int> > vec_vec;
-    // initialize by the .o variable
-    for (int temp = 0; temp < 2 * pow(2, o); temp++)
-    {
-        vector<int> vec;
-        vec_vec.push_back(vec);
-    }
+    vector<string> vec;
+    set<string> vec_set;
+
+    int bound = getNextStateBound(state_table);
     int size = state_table[0].size();
-    // traverse all states
-    for (int temp = 0; temp < state_table.size(); temp++)
+
+    for (int a = 0; a < state_table.size(); a++)
     {
         string str = "";
-        int bound = getNextStateBound(state_table);
-        while (bound < size)
+        int b = bound;
+        while (b < size)
         {
-            str += state_table[temp][bound];
-            bound++;
+            str += state_table[a][b];
+            b++;
         }
-        int bin = string_to_decimal(str);
-
-        // store the index
-        vec_vec[bin].push_back(temp);
+        vec.push_back(str);
+        vec_set.insert(str);
     }
-
-    // index turn to the relative states
-    for (int i = 0; i < vec_vec.size(); i++)
+    for (set<string>::iterator it = vec_set.begin(); it != vec_set.end(); it++)
     {
-        if (vec_vec[i].size() != 0)
+        set<string> temp_set;
+        for (int a = 0; a < vec.size(); a++)
         {
-            set<string> temp_set;
-            for (int j = 0; j < vec_vec[i].size(); j++)
+            if (vec[a] == *it)
             {
-                temp_set.insert(getState(vec_vec[i][j], state) );
+                temp_set.insert(getState(a, state) );
             }
-            first_class.push_back(temp_set);
         }
+        first_class.push_back(temp_set);
     }
+
 }
-void partitioning(vector<set<string> >& second_class, vector<set<string> > first_class, vector<vector<string> > state_table, vector<string> state, vector<vector<string> > next_state)
+vector<set<string> > partitioning(vector<set<string> > first_class, vector<vector<string> > state_table, vector<string> state, vector<vector<string> > next_state)
 {   
     // To get the next_state from state_table, we get to check the end of next states bound
-    int next_state_end = getNextStateBound(state_table);
-
-    // To check whether the state in the same set should be divided
+    int bound = getNextStateBound(state_table);
+    
+    // To check whether the states in the same set should be divided
     int base = 0;
     while (base < first_class.size())
     {
         vector<int> score;
         vector<string> relative_state;
+
         for (set<string>::iterator it = first_class[base].begin(); it != first_class[base].end(); it++)
         {
             int num = 0;
-            for (int k = 1; k < next_state_end; k++)
+            for (int k = 1; k < bound; k++)
                 num += is_in(state_table[position_in_state_table(*it, state_table)][k], first_class);
             score.push_back(num);
             relative_state.push_back(*it);
         }
         int how_many_score = getDiffScore(score);
-
+        
         if (how_many_score == 1)
             base += 1;
         else
         {
             int offset = min_val(score);
-
+            
             vector<set<string> > vec_set;
             for (int j = 0; j < how_many_score; j++)
             {
                 set<string> temp_set;
                 vec_set.push_back(temp_set);
             }
-
+            
             for (int j = 0; j < relative_state.size(); j++)
             {
                 vec_set[score[j] - offset].insert(relative_state[j]);
@@ -125,7 +120,7 @@ void partitioning(vector<set<string> >& second_class, vector<set<string> > first
         }
     }
 
-    second_class = first_class;
+    return first_class;
 }
 void newStateTable(vector<string> rest, vector<vector<string> > state_table, vector<vector<string> >& new_state_table)
 {
@@ -157,13 +152,13 @@ void kissOutput(fstream& out, int i, int o, vector<string> rest, vector<vector<s
     out << ".s " << rest.size() << "\n";
     out << ".r " << rest[0] << "\n";
     // state transition part
-    int next_state_end = getNextStateBound(state_table);
+    int bound = getNextStateBound(state_table);
 
     for (int j = 0; j < rest.size(); j++)
     {
         int position = position_in_state_table(rest[j], state_table);
 
-        for (int k = 1; k < next_state_end; k++)
+        for (int k = 1; k < bound; k++)
         {
             out << dec2str(k - 1, i) << " ";
             out << state_table[position][0] << " ";
@@ -172,7 +167,7 @@ void kissOutput(fstream& out, int i, int o, vector<string> rest, vector<vector<s
             else
                 out << state_table[position][k];
             out << " ";
-            out << state_table[position][k - 1 + next_state_end] << "\n";
+            out << state_table[position][k - 1 + bound] << "\n";
         }
     }
 
@@ -221,7 +216,7 @@ void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
             }
         }
     }
-    print_out("Transition:", trans);
+    // print_out("Transition:", trans);
 
     for (int a = 0; a < trans.size(); a++)
     {
@@ -320,7 +315,7 @@ int main(int argc, char** argv)
 
     // successive partitioning by next state transition
     vector<set<string> > second_class;
-    partitioning(second_class, first_class, state_table, state, next_state);
+    second_class = partitioning(first_class, state_table, state, next_state);
 
     print_out("Second Partitioning:", second_class);
 

@@ -74,52 +74,44 @@ void classByOutput(vector<set<string> >& first_class, int o, vector<vector<strin
 }
 vector<set<string> > partitioning(vector<set<string> > first_class, vector<vector<string> > state_table, vector<string> state, vector<vector<string> > next_state)
 {   
-    // To get the next_state from state_table, we get to check the end of next states bound
-    int bound = getNextStateBound(state_table);
-    
-    // To check whether the states in the same set should be divided
     int base = 0;
+    int bound = getNextStateBound(state_table);
+
     while (base < first_class.size())
     {
+        set<int> score_sort;
         vector<int> score;
-        vector<string> relative_state;
-
+        vector<string> rel_state;
+        
         for (set<string>::iterator it = first_class[base].begin(); it != first_class[base].end(); it++)
         {
             int num = 0;
-            for (int k = 1; k < bound; k++)
-                num += is_in(state_table[position_in_state_table(*it, state_table)][k], first_class);
+            int position = position_in_state_table(*it, state_table);
+            for (int a = 1; a < bound; a++)
+                num += is_in(state_table[position][a], first_class);
             score.push_back(num);
-            relative_state.push_back(*it);
+            score_sort.insert(num);
+            rel_state.push_back(*it);
         }
-        int how_many_score = getDiffScore(score);
-        
-        if (how_many_score == 1)
-            base += 1;
+        if (score_sort.size() <= 1)
+            base++;
         else
         {
-            int offset = min_val(score);
-            
-            vector<set<string> > vec_set;
-            for (int j = 0; j < how_many_score; j++)
+            for (set<int>::iterator it = score_sort.begin(); it != score_sort.end(); it++)
             {
-                set<string> temp_set;
-                vec_set.push_back(temp_set);
+                set<string> temp;
+                for (int a = 0; a < rel_state.size(); a++)
+                {
+                    if (score[a] == *it)
+                        temp.insert(rel_state[a]);
+                }
+                first_class.push_back(temp);
             }
-            
-            for (int j = 0; j < relative_state.size(); j++)
-            {
-                vec_set[score[j] - offset].insert(relative_state[j]);
-            }
-            for (int j = 0; j < vec_set.size(); j++)
-                first_class.push_back(vec_set[j]);
-            
-            // should delete the "base" element from first_class since it has been divided
+            // delete the first element of first_class
             vector<set<string> >::iterator it = first_class.begin() + base;
             first_class.erase(it);
         }
     }
-
     return first_class;
 }
 void newStateTable(vector<string> rest, vector<vector<string> > state_table, vector<vector<string> >& new_state_table)

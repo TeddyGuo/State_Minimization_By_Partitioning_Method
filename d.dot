@@ -1,4 +1,4 @@
-diagraph STG {
+digraph STG {
 	rankdir=LR;
 	
 	INIT [shape=point];

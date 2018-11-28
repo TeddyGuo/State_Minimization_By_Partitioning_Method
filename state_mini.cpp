@@ -174,7 +174,7 @@ void kissOutput(fstream& out, int i, int o, vector<string> rest, vector<vector<s
 }
 void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
 {
-    out << "diagraph STG {\n";
+    out << "digraph STG {\n";
     out << "\trankdir=LR;\n";
     out << "\t\n";
     out << "\tINIT [shape=point];\n";

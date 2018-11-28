@@ -11,7 +11,16 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <sstream>
 using namespace std;
+
+template <typename T>
+string to_string(T value)
+{
+	ostringstream os;
+	os << value;
+	return os.str();
+}
 
 // file I/O open and close
 void open(fstream& in, fstream& out, fstream& graph, char** argv)
@@ -63,7 +72,7 @@ string dec2str(int num, int i) // .i var to deal with 0
     string str = "";
     for (j = 0; j < arr.size(); j++)
     {
-        str += to_string(arr[j]);
+	str += to_string(arr[j]);
     }
     return str;
 }
@@ -188,7 +197,7 @@ void vec_set2vec(vector<set<string> > vec_set, vector<string>& vec)
     }
 }
 template <class T>
-void print_out(char* title, vector<vector<T> > vec)
+void print_out(string title, vector<vector<T> > vec)
 {
     cout << title << endl;
     // test print out
@@ -202,7 +211,7 @@ void print_out(char* title, vector<vector<T> > vec)
     }
     cout << endl;
 }
-void print_out(char* title, vector<set<string> > vec)
+void print_out(string title, vector<set<string> > vec)
 {
     cout << title << endl;
     // test print out

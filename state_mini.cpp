@@ -51,7 +51,13 @@ void classByOutput(vector<set<string> >& first_class, int o, vector<vector<strin
     // traverse all states
     for (int temp = 0; temp < state_table.size(); temp++)
     {
-        string str = state_table[temp][size - 2] + state_table[temp][size - 1];
+        string str = "";
+        int bound = getNextStateBound(state_table);
+        while (bound < size)
+        {
+            str += state_table[temp][bound];
+            bound++;
+        }
         int bin = string_to_decimal(str);
 
         // store the index
@@ -199,7 +205,7 @@ void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
             trans.push_back(vec);
         }
     }
-    // print_out("Transition:", trans);
+    print_out("Transition:", trans);
     
     for (int a = 0; a < trans.size(); a++)
     {
@@ -215,7 +221,7 @@ void dotOutput(fstream& out, int i, vector<vector<string> > state_table)
             }
         }
     }
-    // print_out("Transition:", trans);
+    print_out("Transition:", trans);
 
     for (int a = 0; a < trans.size(); a++)
     {

@@ -1,0 +1,9 @@
+digraph STG {
+	rankdir=LR;
+	
+	INIT [shape=point];
+	a [label="a"];
+	
+	INIT -> a;
+	a -> a [label="0/00,1/01"];
+}

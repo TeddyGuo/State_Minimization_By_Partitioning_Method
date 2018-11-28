@@ -1,0 +1,9 @@
+.start_kiss
+.i 1
+.o 2
+.p 2
+.s 1
+.r a
+0 a a 00
+1 a a 01
+.end_kiss
